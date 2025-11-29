@@ -1,8 +1,7 @@
-import React from 'react';
-import './css/Main.css';
+import './css/ProfileDetail.css';
 import FloatingBar from './components/FloatingBar';
 
-function Main() {
+function ProfileDetail() {
   return (
     <div className="container">
       <FloatingBar />
@@ -10,4 +9,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default ProfileDetail;

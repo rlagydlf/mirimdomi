@@ -1,0 +1,11 @@
+.floating-bar {
+  height: 100%;
+  width: 300px;
+  background-color: white;
+  position: fixed; /* Make it float */
+  top: 0;
+  left: 0;
+  /* Add some padding and shadow for better appearance */
+  padding: 20px;
+  box-sizing: border-box; /* Include padding in width/height */
+}
