@@ -1,5 +1,4 @@
-import React from 'react';
-import './css/Main.css';
+
 import FloatingBar from './components/FloatingBar';
 
 function Main() {
