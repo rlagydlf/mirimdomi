@@ -2,6 +2,7 @@ import React from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import './css/Login.css';
+import { supabase } from '../supabaseClient'; // Supabase 클라이언트 가져오기
 
 const imgDeviconGoogle = "/img/google-icon.svg";
 
@@ -27,10 +28,32 @@ function Login({ onLoginSuccess }) {
         };
 
         console.log('로그인 성공:', userInfo);
-        
+
+        // Supabase 'users' 테이블에 사용자 정보 저장 (upsert)
+        const { data, error } = await supabase
+          .from('users')
+          .upsert(
+            {
+              id: userInfo.id,
+              email: userInfo.email,
+              name: userInfo.name,
+              profile_image: userInfo.picture,
+            },
+            { onConflict: 'id' }
+          )
+          .select();
+
+        if (error) {
+          console.error('Supabase 데이터 저장 실패:', error);
+          alert('데이터베이스에 사용자 정보를 저장하는 중 오류가 발생했습니다.');
+          return;
+        }
+
+        console.log('Supabase에 사용자 정보 저장 완료:', data);
+
         // 토큰 저장
         localStorage.setItem('googleAccessToken', tokenResponse.access_token);
-        
+
         // 부모 컴포넌트에 로그인 성공 알림
         if (onLoginSuccess) {
           onLoginSuccess(userInfo);

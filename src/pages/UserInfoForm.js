@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import './css/UserInfoForm.css';
 
 const imgCheck = "/img/check-icon.svg";
@@ -29,8 +30,30 @@ function UserInfoForm({ userInfo, onSubmit, onCancel }) {
     }));
   };
 
-  const handleSubmit = () => {
-    onSubmit(formData);
+  const handleSubmit = async () => {
+    if (!userInfo || !userInfo.id) {
+      alert("사용자 정보가 없어 업데이트할 수 없습니다.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        name: formData.name,
+        student_id: formData.studentId,
+        room_number: formData.roomNumber,
+        address: formData.address,
+      })
+      .eq('id', userInfo.id)
+      .select();
+
+    if (error) {
+      console.error('Supabase 데이터 업데이트 실패:', error);
+      alert('데이터베이스에 사용자 정보를 업데이트하는 중 오류가 발생했습니다.');
+    } else {
+      console.log('Supabase에 사용자 정보 업데이트 완료:', data);
+      onSubmit(formData);
+    }
   };
 
   const handleAddressSearch = () => {
