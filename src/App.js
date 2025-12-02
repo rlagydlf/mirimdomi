@@ -7,7 +7,7 @@ import Main from './pages/main';
 import Application from './pages/application';
 import Community from './pages/community';
 import Laundry from './pages/laundryResv';
-import Profile from './pages/profiledetail';
+import Profile from './pages/ProfileDetail';
 import Notice from './pages/notice';
 import Alarm from './pages/alarm';
 
