@@ -29,34 +29,19 @@ function Login({ onLoginSuccess }) {
 
         console.log('로그인 성공:', userInfo);
 
-        // Supabase 'users' 테이블에 사용자 정보 저장 (upsert)
-        const { data, error } = await supabase
-          .from('users')
-          .upsert(
-            {
-              id: userInfo.id,
-              email: userInfo.email,
-              name: userInfo.name,
-              profile_image: userInfo.picture,
-            },
-            { onConflict: 'id' }
-          )
-          .select();
+        // Google 사용자 ID를 localStorage에 저장
+        localStorage.setItem('googleUserId', userInfo.id);
+        localStorage.setItem('googleAccessToken', tokenResponse.access_token); // App.js에서 필요
 
-        if (error) {
-          console.error('Supabase 데이터 저장 실패:', error);
-          alert('데이터베이스에 사용자 정보를 저장하는 중 오류가 발생했습니다.');
-          return;
-        }
-
-        console.log('Supabase에 사용자 정보 저장 완료:', data);
-
-        // 토큰 저장
-        localStorage.setItem('googleAccessToken', tokenResponse.access_token);
-
-        // 부모 컴포넌트에 로그인 성공 알림
+        // 부모 컴포넌트에 로그인 성공 알림 (App.js의 handleLoginSuccess가 fetchUserProfile을 호출할 것임)
         if (onLoginSuccess) {
-          onLoginSuccess(userInfo);
+          onLoginSuccess({
+            id: userInfo.id,
+            accessToken: tokenResponse.access_token,
+            email: userInfo.email,
+            name: userInfo.name,
+            picture: userInfo.picture,
+          });
         }
       } catch (error) {
         console.error('사용자 정보 가져오기 실패:', error);
