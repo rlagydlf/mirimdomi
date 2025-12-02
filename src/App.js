@@ -38,7 +38,7 @@ function App() {
 
       if (data) {
         setUserInfo(data);
-        setIsNewUser(!data.infoComplete); // 'infoComplete' 컬럼으로 새 사용자인지 판단
+        setIsNewUser(!data.infocomplete); // 'infocomplete' 컬럼으로 새 사용자인지 판단
       } else {
         // Supabase에 정보가 없으면 새로운 사용자
         setUserInfo(prev => ({ ...prev, id: googleUserId })); // Google ID만 임시로 설정
@@ -88,7 +88,7 @@ function App() {
           student_id: formData.studentId,
           room_number: formData.roomNumber,
           address: formData.address,
-          infoComplete: true // 사용자 정보 입력 완료
+          infocomplete: true // 사용자 정보 입력 완료
         })
         .eq('id', userInfo.id);
 
