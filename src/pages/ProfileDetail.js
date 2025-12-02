@@ -137,7 +137,7 @@ function ProfileDetail({ userInfo, onUserInfoUpdate }) {
 
       <div className='whiteBox'>
         <div className='profileBox'>
-          <img src={profileImage} alt="" className="profileImage" />
+          <img src={profileImage} alt="프로필" className="profileImage" />
           <input
             type="file"
             accept="image/*"

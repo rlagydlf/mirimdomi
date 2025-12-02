@@ -188,8 +188,8 @@ const fetchTimetable = async (grade, classNum, date) => {
 
   // userInfo가 변경되면 오늘 날짜의 시간표만 불러오기
   useEffect(() => {
-    if (userInfo?.studentId) {
-      const { grade, class: classNum } = getGradeAndClass(userInfo.studentId);
+    if (userInfo?.student_id) { // <-- student_id로 변경
+      const { grade, class: classNum } = getGradeAndClass(userInfo.student_id); // <-- student_id로 변경
       if (grade && classNum) {
         // 항상 오늘 날짜만 사용
         const today = new Date();
@@ -343,23 +343,23 @@ const fetchTimetable = async (grade, classNum, date) => {
         {/* 나에 대한 요약 */}
         <div className="home-card user-summary-card" style={{ position: 'absolute' }}>
           <div className="user-summary-content">
-            <div className="user-avatar" style={userInfo?.profileImage ? { backgroundImage: `url(${userInfo.profileImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}></div>
+            <div className="user-avatar" style={userInfo?.profile_image ? { backgroundImage: `url(${userInfo.profile_image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}></div>
             <div className="user-info">
-              <p className="user-room">{userInfo?.roomNumber ? `${userInfo.roomNumber}호` : '호실 없음'}</p>
-              <p className="user-name">{userInfo?.studentId && userInfo?.name ? `${userInfo.studentId} ${userInfo.name}` : userInfo?.name || '사용자'}</p>
+              <p className="user-room">{userInfo?.room_number ? `${userInfo.room_number}호` : '호실 없음'}</p>
+              <p className="user-name">{userInfo?.name || '사용자'}</p>
             </div>
             <div className="user-scores">
               <div className="score-item">
                 <p className="score-label">상점</p>
-                <p className="score-value positive">{userInfo?.bonusPoints || 0}</p>
+                <p className="score-value positive">{userInfo?.merits || 0}</p>
               </div>
               <div className="score-item">
                 <p className="score-label">벌점</p>
-                <p className="score-value negative">{userInfo?.penaltyPoints || 0}</p>
+                <p className="score-value negative">{userInfo?.demerits || 0}</p>
               </div>
               <div className="score-item">
                 <p className="score-label">총합</p>
-                <p className="score-value">{(userInfo?.bonusPoints || 0) - (userInfo?.penaltyPoints || 0)}</p>
+                <p className="score-value">{(userInfo?.merits || 0) - (userInfo?.demerits || 0)}</p>
               </div>
             </div>
           </div>
