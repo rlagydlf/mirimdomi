@@ -10,8 +10,6 @@ import Laundry from './pages/laundryResv';
 import Profile from './pages/profiledetail';
 import Notice from './pages/notice';
 import Alarm from './pages/alarm';
-import ProfileDetail from './pages/profiledetail';
-import LaundryResv from './pages/laundryResv';
 
 import './App.css';
 
@@ -92,9 +90,6 @@ function App() {
                 <Route path="notice" element={<Notice />} />
                 <Route path="alarm" element={<Alarm />} />
               </Route>
-              <Route path="/main" element={<Main />} />
-              <Route path="/laundryResv" element={<LaundryResv />} />
-              <Route path="/profiledetail" element={<ProfileDetail />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}
