@@ -1,8 +1,10 @@
+
 import React, { useState, useRef } from 'react';
 import { supabase } from '../supabaseClient'; // Supabase 클라이언트 임포트
+
 import './css/profiledetail.css';
 
-function ProfileDetail({ userInfo }) {
+function ProfileDetail({ userInfo }) { // onUserInfoUpdate prop 제거
   const today = new Date();
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, '0');

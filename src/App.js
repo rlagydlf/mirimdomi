@@ -65,6 +65,10 @@ function App() {
     setUserInfo(null);
   };
 
+  const handleUserInfoUpdate = (updatedUserInfo) => {
+    setUserInfo(updatedUserInfo);
+  };
+
   return (
     <Router>
       <div className="App">
@@ -85,8 +89,8 @@ function App() {
                 <Route index element={<Main userInfo={userInfo} />} />
                 <Route path="application" element={<Application />} />
                 <Route path="community" element={<Community />} />
-                <Route path="laundry" element={<Laundry />} />
-                <Route path="profile" element={<Profile userInfo={userInfo} />} />
+                <Route path="laundry" element={<Laundry userInfo={userInfo} />} />
+                <Route path="profile" element={<Profile userInfo={userInfo} onUserInfoUpdate={handleUserInfoUpdate} />} />
                 <Route path="notice" element={<Notice />} />
                 <Route path="alarm" element={<Alarm />} />
               </Route>

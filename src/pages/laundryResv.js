@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './css/laundryResv.css';
 
-function LaundryResv() {
+function LaundryResv({ userInfo }) {
   const today = new Date();
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
@@ -35,11 +35,19 @@ function LaundryResv() {
   const emptyWashMacImagePath = process.env.PUBLIC_URL + '/img/emptyWashMacImg.svg';
 
   const handleReservationClick = (slotId) => {
+    // 사용자 정보가 없으면 예약 불가
+    if (!userInfo) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
     setReservationSlots(currentSlots =>
       currentSlots.map(slot => {
         if (slot.id === slotId) {
-          // Update the slot to be 'selected' with the new info
-          return { ...slot, status: 'selected', room: '406호', name: '박시은' };
+          // 사용자 정보로 예약 슬롯 업데이트
+          const roomNumber = userInfo.roomNumber ? `${userInfo.roomNumber}호` : '호실 정보 없음';
+          const userName = userInfo.name || '이름 없음';
+          return { ...slot, status: 'selected', room: roomNumber, name: userName };
         }
         return slot;
       })
