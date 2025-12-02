@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './css/laundryResv.css';
-import FloatingBar from './components/FloatingBar';
 
 function LaundryResv() {
   const today = new Date();
@@ -49,9 +48,8 @@ function LaundryResv() {
 
   return (
     <div className='container2'>
-      <FloatingBar />
       <div className="contentText">
-        <h5 className="contentTitle">세탁 예약</h5>                    
+        <h5 className="laundryResv-title">세탁 예약</h5>                    
         <p className="current-date">{formattedDate}</p>
 
         <div className="wash-mac-list">

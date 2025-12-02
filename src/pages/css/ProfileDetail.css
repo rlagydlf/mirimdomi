@@ -5,6 +5,37 @@
     color: #333;
 }
 
+.profile-header {
+  position: absolute;
+  left: 345px;
+  top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 1;
+}
+
+
+.profile-title {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -1.12px;
+  color: #212121;
+  margin: 0;
+}
+
+.profile-date {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.88px;
+  color: #616161;
+  margin: 0;
+}
+
 .whiteBox {
     width: 1356px;
     /* User specified width */
@@ -120,7 +151,6 @@
     align-items: center; /* Vertically center the items */
     gap: 20px; /* Add some space between items */
     margin-top: 30px;
-    margin-left: -40px;
 }
 
 .plusImage, .minusImage {

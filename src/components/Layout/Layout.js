@@ -1,6 +1,5 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../Navigation/Sidebar';
+import Sidebar from '../Navigation/sidebar.js';
 import './Layout.css';
 
 function Layout({ userInfo, onLogout }) {

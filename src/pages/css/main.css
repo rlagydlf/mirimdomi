@@ -593,17 +593,17 @@
   .home-header {
     left: calc(296px + 23px);
   }
-  
+
   .user-summary-card,
   .timetable-card {
     left: calc(296px + 23px);
   }
-  
+
   .notice-card,
   .community-card {
     left: calc(50% - 300px);
   }
-  
+
   .alarm-card,
   .meal-card {
     left: calc(50% + 20px);
@@ -615,18 +615,18 @@
     position: static;
     margin: 64px 0 16px 20px;
   }
-  
+
   .home-card {
     position: static !important;
     width: 100% !important;
     height: auto !important;
     margin: 20px;
   }
-  
+
   .user-summary-card {
     padding: 30px 60px;
   }
-  
+
   .more-link {
     position: static;
     margin-top: 20px;
