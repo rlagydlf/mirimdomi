@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './css/profiledetail.css';
 
-function ProfileDetail({ userInfo }) {
+function ProfileDetail({ userInfo, onUserInfoUpdate }) {
   const today = new Date();
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, '0');
@@ -20,12 +20,31 @@ function ProfileDetail({ userInfo }) {
     penaltyPoints: userInfo?.penaltyPoints || 0,
   });
 
+  // userInfo가 변경되면 points 업데이트
+  useEffect(() => {
+    setPoints({
+      bonusPoints: userInfo?.bonusPoints || 0,
+      penaltyPoints: userInfo?.penaltyPoints || 0,
+    });
+    setProfileImage(userInfo?.profileImage || process.env.PUBLIC_URL + '/img/default-profile.png');
+  }, [userInfo]);
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        const imageData = reader.result;
+        setProfileImage(imageData);
+        // localStorage에 저장
+        const updatedUserInfo = {
+          ...userInfo,
+          profileImage: imageData
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUserInfo));
+        if (onUserInfoUpdate) {
+          onUserInfoUpdate(updatedUserInfo);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -36,10 +55,23 @@ function ProfileDetail({ userInfo }) {
   };
 
   const handlePointChange = (field, amount) => {
-    setPoints(prev => ({
-      ...prev,
-      [field]: Math.max(0, prev[field] + amount)
-    }));
+    setPoints(prev => {
+      const newPoints = {
+        ...prev,
+        [field]: Math.max(0, prev[field] + amount)
+      };
+      // localStorage에 저장
+      const updatedUserInfo = {
+        ...userInfo,
+        bonusPoints: newPoints.bonusPoints,
+        penaltyPoints: newPoints.penaltyPoints
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUserInfo));
+      if (onUserInfoUpdate) {
+        onUserInfoUpdate(updatedUserInfo);
+      }
+      return newPoints;
+    });
   };
 
   return (
