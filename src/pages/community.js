@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect 추가
 import './css/community.css';
+import { supabase } from '../supabaseClient'; // Supabase 클라이언트 임포트
 
 // 로컬 이미지 경로
 const eyeIcon = "/img/eye-icon.svg";
@@ -14,13 +15,16 @@ const CommentSendIcon = () => (
   </svg>
 );
 
-function Community() {
+function Community({ userInfo }) { // userInfo prop 받기
   const [selectedTab, setSelectedTab] = useState('게시판');
   const [selectedPost, setSelectedPost] = useState(null);
   const [comment, setComment] = useState('');
   const [selectedBoard, setSelectedBoard] = useState(null); // 선택된 게시판 (null이면 메인 화면)
   const [writeTitle, setWriteTitle] = useState('');
   const [writeContent, setWriteContent] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('자유 게시판'); // 새 글 작성 시 카테고리
+  const [posts, setPosts] = useState([]); // Supabase에서 가져올 게시글 목록
+  const [loading, setLoading] = useState(true); // 로딩 상태
 
   // 현재 날짜 포맷팅
   const getCurrentDate = () => {
@@ -31,79 +35,96 @@ function Community() {
     return `${year}.${month}.${day}`;
   };
 
-  // 게시판 목록 데이터
-  const boardLists = {
-    '분실물 게시판': [
-      { id: 1, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 2, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 3, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 4, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 5, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-    ],
-    '자유 게시판': [
-      { id: 6, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 7, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 8, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 9, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-      { id: 10, title: '시험기간인데 휴게실 조용히 좀 써주세요.', time: '03:14' },
-    ]
+  // 게시글 가져오기 (초기 로딩 및 새로고침)
+  const fetchPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, title, category, views, comments_count, created_at, user_name')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('게시글 불러오기 실패:', error);
+      alert('게시글을 불러오는 중 오류가 발생했습니다.');
+    } else {
+      setPosts(data);
+    }
+    setLoading(false);
   };
 
-  // 게시글 상세 데이터 (기본 표시용)
-  const defaultPostDetail = {
-    id: 1,
-    category: '[자유]',
-    title: '시험기간인데 휴게실 조용히 좀 써주세요.',
-    date: '2025.11.09',
-    views: 23,
-    comments: 2,
-    content: '나는 아무 걱정도 없이 가을 속의 별들을 다 헬 듯합니다. 별 하나에 추억과 별 하나에 사랑과 별 하나에 쓸쓸함과 별 하나에 동경과 별 하나에 시와 별 하나에 어머니, 어머니, 어머님, 나는 별 하나에 아름다운 말 한 마디씩 불러 봅니다. 딴은 밤을 세워 우는 벌레는 부끄러운 이름을 슬퍼하는 까닭입니다.',
-    commentsList: [
-      { id: 1, content: '그거 제거인 거 같아요. 어디로 가지러 가면 될까요?', time: '11/14 03:14' },
-      { 
-        id: 2, 
-        content: '그거 제거인 거 같아요. 어디로 가지러 가면 될까요?', 
-        time: '11/14 03:14'
-      }
-    ]
-  };
-
-  // 표시할 게시글 (선택된 게시글이 있을 때만 표시)
-  const displayPost = selectedPost;
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const handlePostClick = (post) => {
     // 클릭한 게시글을 선택 (나중에 API에서 상세 정보 가져오기)
-    setSelectedPost({
-      ...defaultPostDetail,
-      id: post.id,
-      title: post.title
-    });
+    // 현재는 게시글 상세 데이터가 없으므로 임시로 post 객체만 저장
+    setSelectedPost(post);
   };
 
   const handleBoardArrowClick = (boardName, e) => {
-    // 이벤트 전파 방지
     e.stopPropagation();
-    // 전체 게시판 목록 보기 모드로 전환
     setSelectedBoard(boardName);
   };
 
   const handleBoardClick = (boardName) => {
-    // 게시판 제목 클릭 시 전체 게시판 목록 보기 모드로 전환
     setSelectedBoard(boardName);
   };
 
   const handleBackToMain = () => {
-    // 메인 화면으로 돌아가기
     setSelectedBoard(null);
+    setSelectedPost(null); // 게시글 상세 화면에서도 뒤로가기 시 초기화
   };
 
   const handleCommentSubmit = () => {
     if (comment.trim()) {
-      // 댓글 추가 로직 (나중에 API 연동)
       console.log('댓글:', comment);
       setComment('');
     }
   };
+
+  const handlePostSubmit = async () => {
+    if (!writeTitle.trim() || !writeContent.trim()) {
+      alert('제목과 내용을 모두 입력해주세요.');
+      return;
+    }
+    if (!userInfo?.id || !userInfo?.name) {
+      alert('사용자 정보를 찾을 수 없습니다. 로그인 상태를 확인해주세요.');
+      return;
+    }
+
+    const newPost = {
+      title: writeTitle,
+      content: writeContent,
+      category: selectedCategory,
+      user_id: userInfo.id,
+      user_name: userInfo.name,
+    };
+
+    const { error } = await supabase.from('posts').insert([newPost]);
+
+    if (error) {
+      console.error('게시글 작성 실패:', error);
+      alert('게시글 작성 중 오류가 발생했습니다: ' + error.message);
+    } else {
+      alert('게시글이 성공적으로 작성되었습니다.');
+      setWriteTitle('');
+      setWriteContent('');
+      setSelectedCategory('자유 게시판'); // 기본값으로 초기화
+      setSelectedTab('게시판'); // 게시판 목록으로 이동
+      fetchPosts(); // 게시글 목록 새로고침
+    }
+  };
+
+
+  // 게시판 목록 데이터 필터링 (selectedBoard에 따라)
+  const filteredPosts = selectedBoard 
+    ? posts.filter(post => post.category === selectedBoard)
+    : posts;
+
+
+  // 기존 boardLists 및 defaultPostDetail 제거 (하드코딩된 데이터 제거)
+  // (JSX 부분에서 posts 상태를 사용하도록 변경 예정)
 
   return (
     <div className="community">
@@ -130,217 +151,228 @@ function Community() {
 
       {selectedTab === '게시판' ? (
         <>
-          {selectedBoard ? (
-            /* 선택된 게시판만 보기 */
-            <>
-              <div className="board-full-list-container">
-                <div className="board-full-list-header">
-                  <button className="back-button" onClick={handleBackToMain}>
-                    <img src={arrowRightIcon} alt="뒤로가기" className="back-icon" />
-                  </button>
-                  <h2 className="board-full-list-title">{selectedBoard}</h2>
-                </div>
-                <div className="board-full-list">
-                  {boardLists[selectedBoard].map((post) => (
-                    <div 
-                      key={post.id} 
-                      className="board-item"
-                      onClick={() => handlePostClick(post)}
-                    >
-                      <p className="board-item-title">{post.title}</p>
-                      <p className="board-item-time">{post.time}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 오른쪽: 게시글 상세 (게시글 선택 시에만 표시) */}
-              {displayPost && (
-                <div className="post-detail-container">
-                  <div className="post-header">
-                    <div className="post-title-section">
-                      <div className="post-title-row">
-                        <h2 className="post-title">{displayPost.category} {displayPost.title}</h2>
-                        <p className="post-date">{displayPost.date}</p>
-                      </div>
-                      <div className="post-stats">
-                        <div className="post-stat-item">
-                          <img src={eyeIcon} alt="조회" className="stat-icon" />
-                          <span className="stat-value">{displayPost.views}</span>
-                        </div>
-                        <div className="post-stat-item">
-                          <img src={commentIcon} alt="댓글" className="stat-icon" />
-                          <span className="stat-value">{displayPost.comments}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="post-content">
-                    <p>{displayPost.content}</p>
-                  </div>
-
-                  {/* 댓글 섹션 */}
-                  <div className="comments-section">
-                    <div className="comments-header">
-                      <h3 className="comments-title">댓글 {displayPost.comments}</h3>
-                      <div className="comments-list">
-                        {displayPost.commentsList.map((comment, index) => (
-                          <div key={comment.id} className="comment-item">
-                            <p className="comment-content">{comment.content}</p>
-                            <div className="comment-meta">
-                              <p className="comment-time">{comment.time}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 댓글 입력 */}
-                    <div className="comment-input-container">
-                      <input
-                        type="text"
-                        className="comment-input"
-                        placeholder="댓글을 입력하세요"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
-                      />
-                      <button 
-                        className={`comment-send-btn ${comment ? 'active' : ''}`} 
-                        onClick={handleCommentSubmit}
-                      >
-                        <CommentSendIcon />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
+          {loading ? (
+            <div className="loading-message">게시글을 불러오는 중...</div>
           ) : (
             <>
-              {/* 왼쪽: 게시판 목록 */}
-              <div className="board-list-container">
-                {/* 분실물 게시판 */}
-                <div className="board-section">
-                  <div 
-                    className="board-section-header"
-                    onClick={() => handleBoardClick('분실물 게시판')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <h3 className="board-section-title">분실물 게시판</h3>
-                    <button 
-                      className="board-arrow-btn"
-                      onClick={(e) => handleBoardArrowClick('분실물 게시판', e)}
-                    >
-                      <img src={arrowRightIcon} alt="더보기" className="arrow-icon" />
-                    </button>
+              {selectedBoard ? (
+                /* 선택된 게시판만 보기 */
+                <>
+                  <div className="board-full-list-container">
+                    <div className="board-full-list-header">
+                      <button className="back-button" onClick={handleBackToMain}>
+                        <img src={arrowRightIcon} alt="뒤로가기" className="back-icon" />
+                      </button>
+                      <h2 className="board-full-list-title">{selectedBoard}</h2>
+                    </div>
+                    <div className="board-full-list">
+                      {filteredPosts.map((post) => (
+                        <div 
+                          key={post.id} 
+                          className="board-item"
+                          onClick={() => handlePostClick(post)}
+                        >
+                          <p className="board-item-title">{post.title}</p>
+                          <p className="board-item-time">{new Date(post.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                      ))}
+                      {filteredPosts.length === 0 && <div className="no-posts-message">게시글이 없습니다.</div>}
+                    </div>
                   </div>
-                  <div className="board-items">
-                    {boardLists['분실물 게시판'].slice(0, 5).map((post) => (
-                      <div 
-                        key={post.id} 
-                        className="board-item"
-                        onClick={() => handlePostClick(post)}
-                      >
-                        <p className="board-item-title">{post.title}</p>
-                        <p className="board-item-time">{post.time}</p>
+
+                  {/* 오른쪽: 게시글 상세 (게시글 선택 시에만 표시) */}
+                  {selectedPost && ( // displayPost 대신 selectedPost 사용
+                    <div className="post-detail-container">
+                      <div className="post-header">
+                        <div className="post-title-section">
+                          <div className="post-title-row">
+                            <h2 className="post-title">[{selectedPost.category}] {selectedPost.title}</h2>
+                            <p className="post-date">{new Date(selectedPost.created_at).toLocaleDateString('ko-KR')}</p>
+                          </div>
+                          <div className="post-stats">
+                            <div className="post-stat-item">
+                              <img src={eyeIcon} alt="조회" className="stat-icon" />
+                              <span className="stat-value">{selectedPost.views}</span>
+                            </div>
+                            <div className="post-stat-item">
+                              <img src={commentIcon} alt="댓글" className="stat-icon" />
+                              <span className="stat-value">{selectedPost.comments_count}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* 자유 게시판 */}
-                <div className="board-section">
-                  <div 
-                    className="board-section-header"
-                    onClick={() => handleBoardClick('자유 게시판')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <h3 className="board-section-title">자유 게시판</h3>
-                    <button 
-                      className="board-arrow-btn"
-                      onClick={(e) => handleBoardArrowClick('자유 게시판', e)}
-                    >
-                      <img src={arrowRightIcon} alt="더보기" className="arrow-icon" />
-                    </button>
-                  </div>
-                  <div className="board-items">
-                    {boardLists['자유 게시판'].slice(0, 5).map((post) => (
-                      <div 
-                        key={post.id} 
-                        className="board-item"
-                        onClick={() => handlePostClick(post)}
-                      >
-                        <p className="board-item-title">{post.title}</p>
-                        <p className="board-item-time">{post.time}</p>
+                      <div className="post-content">
+                        <p>{selectedPost.content}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              {/* 오른쪽: 게시글 상세 (게시글 선택 시에만 표시) */}
-              {displayPost && (
-              <div className="post-detail-container">
-            <div className="post-header">
-              <div className="post-title-section">
-                <div className="post-title-row">
-                  <h2 className="post-title">{displayPost.category} {displayPost.title}</h2>
-                  <p className="post-date">{displayPost.date}</p>
-                </div>
-                <div className="post-stats">
-                  <div className="post-stat-item">
-                    <img src={eyeIcon} alt="조회" className="stat-icon" />
-                    <span className="stat-value">{displayPost.views}</span>
-                  </div>
-                  <div className="post-stat-item">
-                    <img src={commentIcon} alt="댓글" className="stat-icon" />
-                    <span className="stat-value">{displayPost.comments}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                      {/* 댓글 섹션 (추후 구현) */}
+                      <div className="comments-section">
+                        <div className="comments-header">
+                          <h3 className="comments-title">댓글 (0)</h3> {/* 동적으로 변경 예정 */}
+                          <div className="comments-list">
+                            <div className="no-comments-message">댓글이 없습니다.</div>
+                            {/* {selectedPost.commentsList.map((comment, index) => (
+                              <div key={comment.id} className="comment-item">
+                                <p className="comment-content">{comment.content}</p>
+                                <div className="comment-meta">
+                                  <p className="comment-time">{comment.time}</p>
+                                </div>
+                              </div>
+                            ))} */}
+                          </div>
+                        </div>
 
-            <div className="post-content">
-              <p>{displayPost.content}</p>
-            </div>
-
-            {/* 댓글 섹션 */}
-            <div className="comments-section">
-              <div className="comments-header">
-                <h3 className="comments-title">댓글 {displayPost.comments}</h3>
-                <div className="comments-list">
-                  {displayPost.commentsList.map((comment, index) => (
-                    <div key={comment.id} className="comment-item">
-                      <p className="comment-content">{comment.content}</p>
-                      <div className="comment-meta">
-                        <p className="comment-time">{comment.time}</p>
+                        {/* 댓글 입력 */}
+                        <div className="comment-input-container">
+                          <input
+                            type="text"
+                            className="comment-input"
+                            placeholder="댓글을 입력하세요"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
+                          />
+                          <button 
+                            className={`comment-send-btn ${comment ? 'active' : ''}`} 
+                            onClick={handleCommentSubmit}
+                          >
+                            <CommentSendIcon />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* 왼쪽: 게시판 목록 */}
+                  <div className="board-list-container">
+                    {/* 분실물 게시판 */}
+                    <div className="board-section">
+                      <div 
+                        className="board-section-header"
+                        onClick={() => handleBoardClick('분실물 게시판')}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <h3 className="board-section-title">분실물 게시판</h3>
+                        <button 
+                          className="board-arrow-btn"
+                          onClick={(e) => handleBoardArrowClick('분실물 게시판', e)}
+                        >
+                          <img src={arrowRightIcon} alt="더보기" className="arrow-icon" />
+                        </button>
+                      </div>
+                      <div className="board-items">
+                        {posts.filter(post => post.category === '분실물 게시판').slice(0, 5).map((post) => (
+                          <div 
+                            key={post.id} 
+                            className="board-item"
+                            onClick={() => handlePostClick(post)}
+                          >
+                            <p className="board-item-title">{post.title}</p>
+                            <p className="board-item-time">{new Date(post.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</p>
+                          </div>
+                        ))}
+                        {posts.filter(post => post.category === '분실물 게시판').length === 0 && <div className="no-posts-message">게시글이 없습니다.</div>}
+                      </div>
+                    </div>
 
-              {/* 댓글 입력 */}
-              <div className="comment-input-container">
-                <input
-                  type="text"
-                  className="comment-input"
-                  placeholder="댓글을 입력하세요"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
-                />
-                <button 
-                  className={`comment-send-btn ${comment ? 'active' : ''}`} 
-                  onClick={handleCommentSubmit}
-                >
-                  <CommentSendIcon />
-                </button>
-              </div>
-            </div>
-          </div>
+                    {/* 자유 게시판 */}
+                    <div className="board-section">
+                      <div 
+                        className="board-section-header"
+                        onClick={() => handleBoardClick('자유 게시판')}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <h3 className="board-section-title">자유 게시판</h3>
+                        <button 
+                          className="board-arrow-btn"
+                          onClick={(e) => handleBoardArrowClick('자유 게시판', e)}
+                        >
+                          <img src={arrowRightIcon} alt="더보기" className="arrow-icon" />
+                        </button>
+                      </div>
+                      <div className="board-items">
+                        {posts.filter(post => post.category === '자유 게시판').slice(0, 5).map((post) => (
+                          <div 
+                            key={post.id} 
+                            className="board-item"
+                            onClick={() => handlePostClick(post)}
+                          >
+                            <p className="board-item-title">{post.title}</p>
+                            <p className="board-item-time">{new Date(post.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</p>
+                          </div>
+                        ))}
+                        {posts.filter(post => post.category === '자유 게시판').length === 0 && <div className="no-posts-message">게시글이 없습니다.</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 오른쪽: 게시글 상세 (게시글 선택 시에만 표시) */}
+                  {selectedPost && ( // displayPost 대신 selectedPost 사용
+                  <div className="post-detail-container">
+                    <div className="post-header">
+                      <div className="post-title-section">
+                        <div className="post-title-row">
+                          <h2 className="post-title">[{selectedPost.category}] {selectedPost.title}</h2>
+                          <p className="post-date">{new Date(selectedPost.created_at).toLocaleDateString('ko-KR')}</p>
+                        </div>
+                        <div className="post-stats">
+                          <div className="post-stat-item">
+                            <img src={eyeIcon} alt="조회" className="stat-icon" />
+                            <span className="stat-value">{selectedPost.views}</span>
+                          </div>
+                          <div className="post-stat-item">
+                            <img src={commentIcon} alt="댓글" className="stat-icon" />
+                            <span className="stat-value">{selectedPost.comments_count}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="post-content">
+                      <p>{selectedPost.content}</p>
+                    </div>
+
+                    {/* 댓글 섹션 (추후 구현) */}
+                    <div className="comments-section">
+                      <div className="comments-header">
+                        <h3 className="comments-title">댓글 (0)</h3> {/* 동적으로 변경 예정 */}
+                        <div className="comments-list">
+                          <div className="no-comments-message">댓글이 없습니다.</div>
+                          {/* {selectedPost.commentsList.map((comment, index) => (
+                            <div key={comment.id} className="comment-item">
+                              <p className="comment-content">{comment.content}</p>
+                              <div className="comment-meta">
+                                <p className="comment-time">{comment.time}</p>
+                              </div>
+                            </div>
+                          ))} */}
+                        </div>
+                      </div>
+
+                      {/* 댓글 입력 */}
+                      <div className="comment-input-container">
+                        <input
+                          type="text"
+                          className="comment-input"
+                          placeholder="댓글을 입력하세요"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
+                        />
+                        <button 
+                          className={`comment-send-btn ${comment ? 'active' : ''}`} 
+                          onClick={handleCommentSubmit}
+                        >
+                          <CommentSendIcon />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  )}
+                </>
               )}
             </>
           )}
@@ -356,6 +388,18 @@ function Community() {
           
           <div className="write-form">
             <div className="write-input-wrapper">
+              {/* 카테고리 선택 */}
+              <div className="write-input-container">
+                <select 
+                  className="write-input write-category-select"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="자유 게시판">자유 게시판</option>
+                  <option value="분실물 게시판">분실물 게시판</option>
+                </select>
+              </div>
+
               <div className="write-input-container">
                 <input
                   type="text"
@@ -398,7 +442,7 @@ function Community() {
               <button className="write-cancel-btn" onClick={() => setSelectedTab('게시판')}>
                 취소
               </button>
-              <button className="write-submit-btn">
+              <button className="write-submit-btn" onClick={handlePostSubmit}>
                 확인
               </button>
             </div>

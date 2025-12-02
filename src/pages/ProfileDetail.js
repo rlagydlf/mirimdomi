@@ -61,7 +61,7 @@ function ProfileDetail({ userInfo, onUserInfoUpdate }) {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      const publicUrl = publicUrlData.publicUrl;
+      const publicUrl = publicUrl.publicUrl;
 
       // users 테이블의 profile_image 컬럼 업데이트
       const { error: updateError } = await supabase
@@ -156,11 +156,11 @@ function ProfileDetail({ userInfo, onUserInfoUpdate }) {
         <div className='studentInfoBox'>
           <div className='numberBox'>
             <div className='numberText'>학번</div>
-            <div className='number'>{userInfo?.studentId || '학번 없음'}</div>
+            <div className='number'>{userInfo?.student_id || '학번 없음'}</div>
           </div>
           <div className='roomBox'>
             <div className='roomText'>호실</div>
-            <div className='roomNum'>{userInfo?.roomNumber || '호실 없음'}</div>
+            <div className='roomNum'>{userInfo?.room_number || '호실 없음'}</div>
           </div>
         </div>
         <div className='pointBox'>
