@@ -2,6 +2,7 @@ import React from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import './css/Login.css';
+import { supabase } from '../supabaseClient'; // Supabase 클라이언트 가져오기
 
 const imgDeviconGoogle = "/img/google-icon.svg";
 
@@ -27,13 +28,20 @@ function Login({ onLoginSuccess }) {
         };
 
         console.log('로그인 성공:', userInfo);
-        
-        // 토큰 저장
-        localStorage.setItem('googleAccessToken', tokenResponse.access_token);
-        
-        // 부모 컴포넌트에 로그인 성공 알림
+
+        // Google 사용자 ID를 localStorage에 저장
+        localStorage.setItem('googleUserId', userInfo.id);
+        localStorage.setItem('googleAccessToken', tokenResponse.access_token); // App.js에서 필요
+
+        // 부모 컴포넌트에 로그인 성공 알림 (App.js의 handleLoginSuccess가 fetchUserProfile을 호출할 것임)
         if (onLoginSuccess) {
-          onLoginSuccess(userInfo);
+          onLoginSuccess({
+            id: userInfo.id,
+            accessToken: tokenResponse.access_token,
+            email: userInfo.email,
+            name: userInfo.name,
+            picture: userInfo.picture,
+          });
         }
       } catch (error) {
         console.error('사용자 정보 가져오기 실패:', error);
